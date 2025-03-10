@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-xr@latest/dist/aframe-xr.min.js"></script>
+    <script>
+      AFRAME.registerComponent('click-to-remove', {
+        init: function () {
+          this.el.addEventListener('click', () => {
+            this.el.parentNode.removeChild(this.el);
+          });
+        }
+      });
+
+      AFRAME.registerComponent('spawn-cubes', {
+        init: function () {
+          for (let i = 0; i < 5; i++) {
+            let sceneEl = document.querySelector('a-scene');
+            let box = document.createElement('a-box');
+            box.setAttribute('position', {
+              x: (Math.random() - 0.5) * 2,
+              y: Math.random() + 0.5,
+              z: (Math.random() - 0.5) * -2
+            });
+            box.setAttribute('color', '#' + Math.floor(Math.random() * 16777215).toString(16));
+            box.setAttribute('click-to-remove', '');
+            sceneEl.appendChild(box);
+          }
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene xr-mode-ui="enabled: true" embedded arjs="sourceType: webcam;">
+      <a-light type="ambient" color="#888"></a-light>
+      <a-camera position="0 1.6 0" look-controls>
+        <a-entity cursor="rayOrigin: mouse"></a-entity>
+      </a-camera>
+      <a-entity spawn-cubes></a-entity>
+    </a-scene>
+  </body>
+</html>
