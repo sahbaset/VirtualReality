@@ -3,14 +3,16 @@
 <head>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-xr@1.2.0/dist/aframe-xr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-super-hands-component@master/dist/aframe-super-hands-component.min.js"></script>
 </head>
 <body>
-    <a-scene webxr="optionalFeatures: hit-test;" xr-mode="immersive-ar">
+    <a-scene webxr="optionalFeatures: hit-test;" xr-mode="immersive-ar" physics="gravity: 0">
         <a-camera position="0 1.6 0" look-controls></a-camera>
         
         <!-- Hand Controls -->
-        <a-entity id="leftHand" hand-tracking-controls="hand: left"></a-entity>
-        <a-entity id="rightHand" hand-tracking-controls="hand: right"></a-entity>
+        <a-entity id="leftHand" hand-tracking-controls="hand: left" super-hands></a-entity>
+        <a-entity id="rightHand" hand-tracking-controls="hand: right" super-hands></a-entity>
         
         <!-- Score UI -->
         <a-entity id="scoreboard" text="value: Score: 0; color: white; width: 2" position="0 2 -2"></a-entity>
@@ -27,15 +29,17 @@
                     const container = document.getElementById('firefly-container');
                     const firefly = document.createElement('a-entity');
                     
-                    const x = 0
-                    const y = 1.5
-                    const z = -1
+                    const x = 0;
+                    const y = 1.5;
+                    const z = -1;
                     
                     firefly.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
                     firefly.setAttribute('material', 'color: yellow; emissive: yellow; emissiveIntensity: 1');
                     firefly.setAttribute('position', `${x} ${y} ${z}`);
                     firefly.setAttribute('firefly', '');
                     firefly.setAttribute('grabbable', '');
+                    firefly.setAttribute('static-body', '');
+                    firefly.setAttribute('collision-filter', 'group: fireflies, collidesWith: hands');
                     
                     container.appendChild(firefly);
                 }
@@ -59,11 +63,12 @@
             
             AFRAME.registerComponent('grabbable', {
                 init: function () {
+                    this.el.setAttribute('dynamic-body', '');
                     this.el.addEventListener('grab-start', () => {
-                        this.el.setAttribute('dynamic-body', '');
+                        this.el.setAttribute('dynamic-body', 'mass: 0');
                     });
                     this.el.addEventListener('grab-end', () => {
-                        this.el.removeAttribute('dynamic-body');
+                        this.el.setAttribute('dynamic-body', 'mass: 1');
                     });
                 }
             });
