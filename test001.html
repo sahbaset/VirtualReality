@@ -1,80 +1,22 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-xr@1.2.0/dist/aframe-xr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@master/dist/aframe-physics-system.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/wmurphyrd/aframe-super-hands-component@master/dist/aframe-super-hands-component.min.js"></script>
-</head>
-<body>
-    <a-scene webxr="optionalFeatures: hit-test;" xr-mode="immersive-ar" physics="gravity: 0">
-        <a-camera position="0 1.6 0" look-controls></a-camera>
-        
-        <!-- Hand Controls -->
-        <a-entity id="leftHand" hand-tracking-controls="hand: left" super-hands></a-entity>
-        <a-entity id="rightHand" hand-tracking-controls="hand: right" super-hands></a-entity>
-        
-        <!-- Score UI -->
-        <a-entity id="scoreboard" text="value: Score: 0; color: white; width: 2" position="0 2 -2"></a-entity>
-        
-        <!-- Firefly Spawner -->
-        <a-entity id="firefly-container"></a-entity>
-        
-        <script>
-            AFRAME.registerComponent('spawn-fireflies', {
-                init: function () {
-                    this.spawnFirefly();
-                },
-                spawnFirefly: function () {
-                    const container = document.getElementById('firefly-container');
-                    const firefly = document.createElement('a-entity');
-                    
-                    const x = 0;
-                    const y = 1.5;
-                    const z = -1;
-                    
-                    firefly.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
-                    firefly.setAttribute('material', 'color: yellow; emissive: yellow; emissiveIntensity: 1');
-                    firefly.setAttribute('position', `${x} ${y} ${z}`);
-                    firefly.setAttribute('firefly', '');
-                    firefly.setAttribute('grabbable', '');
-                    firefly.setAttribute('static-body', '');
-                    firefly.setAttribute('collision-filter', 'group: fireflies, collidesWith: hands');
-                    
-                    container.appendChild(firefly);
-                }
-            });
-            
-            AFRAME.registerComponent('firefly', {
-                init: function () {
-                    this.el.addEventListener('mouseenter', () => {
-                        this.el.parentNode.removeChild(this.el);
-                        increaseScore();
-                    });
-                }
-            });
-            
-            let score = 0;
-            function increaseScore() {
-                score++;
-                document.getElementById('scoreboard').setAttribute('text', `value: Score: ${score};`);
-                setTimeout(() => document.querySelector('a-scene').components['spawn-fireflies'].spawnFirefly(), 1000);
-            }
-            
-            AFRAME.registerComponent('grabbable', {
-                init: function () {
-                    this.el.setAttribute('dynamic-body', '');
-                    this.el.addEventListener('grab-start', () => {
-                        this.el.setAttribute('dynamic-body', 'mass: 0');
-                    });
-                    this.el.addEventListener('grab-end', () => {
-                        this.el.setAttribute('dynamic-body', 'mass: 1');
-                    });
-                }
-            });
-            
-            document.querySelector('a-scene').setAttribute('spawn-fireflies', '');
-        </script>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Simple A-Frame Grabbable</title>
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene xr-mode-ui="enabled: true; XRMode: ar">
+      <a-box
+        grabbable
+        position="0 1 -0.3"
+        scale="0.1 0.1 0.1"
+        rotation="0 45 0"
+        color="#4CC3D9"
+      ></a-box>
+      <a-entity hand-tracking-grab-controls="hand: left;"></a-entity>
+      <a-entity hand-tracking-grab-controls="hand: right;"></a-entity>
+      <a-camera></a-camera>
     </a-scene>
-</body>
+  </body>
 </html>
