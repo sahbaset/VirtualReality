@@ -5,25 +5,28 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-xr@1.2.0/dist/aframe-xr.min.js"></script>
 </head>
 <body>
-    <a-scene webxr="requiredFeatures: hit-test;">
+    <a-scene webxr="requiredFeatures: hit-test;" xr-mode="immersive-ar">
         <a-camera position="0 1.6 0"></a-camera>
-        
+
         <!-- Firefly Entity -->
-        <a-entity id="firefly" geometry="primitive: sphere; radius: 0.1" material="color: yellow; emissive: yellow; emissiveIntensity: 1" position="0 1.5 -1"></a-entity>
-        
+        <a-entity id="firefly" geometry="primitive: sphere; radius: 0.1" 
+                  material="color: yellow; emissive: yellow; emissiveIntensity: 1" 
+                  position="0 1.5 -1" interactive></a-entity>
+
+        <a-entity id="cursor" cursor="rayOrigin: mouse" raycaster="objects: [interactive]"></a-entity>
+
         <script>
             AFRAME.registerComponent('spawn-fireflies', {
                 init: function () {
-                    this.el.addEventListener('click', function () {
-                        // Move firefly to a new random position
+                    this.el.addEventListener('click', () => {
                         const x = (Math.random() - 0.5) * 2;
                         const y = 1 + Math.random() * 1.5;
                         const z = (Math.random() - 0.5) * -2;
-                        this.setAttribute('position', `${x} ${y} ${z}`);
+                        this.el.setAttribute('position', `${x} ${y} ${z}`);
                     });
                 }
             });
-            
+
             document.querySelector('#firefly').setAttribute('spawn-fireflies', '');
         </script>
     </a-scene>
