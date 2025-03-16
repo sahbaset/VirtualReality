@@ -1,49 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR MR Game</title>
+<html>
+  <head>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.138.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.138.0/examples/js/libs/ammo.wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
-</head>
-<body>
-    <a-scene renderer="colorManagement: true" xr-mode-ui="enabled: false" physics="debug: false">
-        
-        <!-- Camera with passthrough support -->
-        <a-entity id="cameraRig" position="0 1.6 0">
-            <a-camera></a-camera>
-            <a-entity id="rightHand" oculus-touch-controls="hand: right" physics-grab></a-entity>
-            <a-entity id="leftHand" oculus-touch-controls="hand: left" physics-grab></a-entity>
-        </a-entity>
-        
-        <!-- Ground for physics interactions -->
-        <a-plane rotation="-90 0 0" width="10" height="10" color="#888" static-body></a-plane>
-
-        <!-- Spawning objects with physics -->
-        <a-entity id="spawner" position="0 1.5 -2">
-            <a-box color="red" width="0.3" height="0.3" depth="0.3" dynamic-body grabbable></a-box>
-        </a-entity>
-    </a-scene>
-
+    <script src="https://cdn.jsdelivr.net/npm/@decentraland/handsfree@latest/dist/handsfree.min.js"></script>
     <script>
-        AFRAME.registerComponent("spawner", {
-            init: function () {
-                this.el.addEventListener("click", () => {
-                    let scene = document.querySelector("a-scene");
-                    let newBox = document.createElement("a-box");
-                    newBox.setAttribute("color", "blue");
-                    newBox.setAttribute("width", "0.3");
-                    newBox.setAttribute("height", "0.3");
-                    newBox.setAttribute("depth", "0.3");
-                    newBox.setAttribute("dynamic-body", "");
-                    newBox.setAttribute("position", "0 1.5 -2");
-                    scene.appendChild(newBox);
-                });
+      AFRAME.registerComponent('hand-interaction', {
+        init: function () {
+          this.el.addEventListener('pinchstarted', (event) => {
+            let obj = event.detail.targetEl;
+            if (obj) {
+              obj.setAttribute('animation', {
+                property: 'position',
+                to: `${Math.random() * 2 - 1} ${Math.random() * 2} ${Math.random() * -2}`,
+                dur: 1000,
+                easing: 'easeInOutQuad'
+              });
             }
-        });
+          });
+        }
+      });
+      
+      AFRAME.registerComponent('spawn-object', {
+        init: function () {
+          this.el.addEventListener('pinchstarted', (event) => {
+            let scene = document.querySelector('a-scene');
+            let newObj = document.createElement('a-entity');
+            let shapes = ['box', 'sphere', 'cylinder'];
+            let colors = ['red', 'blue', 'green', 'yellow', 'purple'];
+            let shape = shapes[Math.floor(Math.random() * shapes.length)];
+            let color = colors[Math.floor(Math.random() * colors.length)];
+            
+            newObj.setAttribute('geometry', `primitive: ${shape}; height: 0.2; width: 0.2; depth: 0.2; radius: 0.2`);
+            newObj.setAttribute('material', `color: ${color}`);
+            newObj.setAttribute('position', `${Math.random() * 2 - 1} ${Math.random() * 2} ${Math.random() * -2}`);
+            newObj.setAttribute('hand-interaction', '');
+            
+            scene.appendChild(newObj);
+          });
+        }
+      });
     </script>
-</body>
+  </head>
+  <body>
+    <a-scene xrextras-gesture-detector webxr="optionalFeatures: hit-test">
+      <!-- Camera with hand tracking -->
+      <a-camera position="0 1.6 0">
+        <a-entity hand-tracking-controls="left"></a-entity>
+        <a-entity hand-tracking-controls="right" spawn-object></a-entity>
+      </a-camera>
+      
+      <!-- Real-world environment integration -->
+      <a-light type="directional" intensity="0.8" position="1 3 1"></a-light>
+      
+      <!-- Interactive objects -->
+      <a-entity geometry="primitive: sphere; radius: 0.2" material="color: red" position="0 1 -1" hand-interaction></a-entity>
+      <a-entity geometry="primitive: box; depth: 0.2; height: 0.2; width: 0.2" material="color: blue" position="-0.5 1.2 -1.2" hand-interaction></a-entity>
+      <a-entity geometry="primitive: cylinder; radius: 0.15; height: 0.3" material="color: green" position="0.5 1.3 -1.5" hand-interaction></a-entity>
+    </a-scene>
+  </body>
 </html>
