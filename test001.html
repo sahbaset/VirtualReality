@@ -1,24 +1,60 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>WebXR AR App</title>
+<head>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@latest/aframe/build/aframe-ar.min.js"></script>
-  </head>
-  <body>
-    <a-scene webxr="optionalFeatures: hit-test;" embedded arjs>
-      
-      <!-- Virtual Object -->
-      <a-box position="0 1 -2" color="red" shadow>
-        <a-animation attribute="rotation" to="360 360 360" dur="5000" repeat="indefinite"></a-animation>
-      </a-box>
-      
-      <!-- Light for better visibility -->
-      <a-light type="directional" position="1 1 1" intensity="0.5"></a-light>
-      <a-light type="ambient" intensity="0.8"></a-light>
-      
-      <!-- Camera with AR Passthrough -->
-      <a-entity camera position="0 1.6 0"></a-entity>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-xr@1.2.0/dist/aframe-xr.min.js"></script>
+</head>
+<body>
+    <a-scene webxr="optionalFeatures: hit-test;" xr-mode="immersive-ar">
+        <a-camera position="0 1.6 0" look-controls></a-camera>
+        
+        <!-- Score UI -->
+        <a-entity id="scoreboard" text="value: Score: 0; color: white; width: 2" position="0 2 -2"></a-entity>
+        
+        <!-- Firefly Spawner -->
+        <a-entity id="firefly-container"></a-entity>
+        
+        <script>
+            AFRAME.registerComponent('spawn-fireflies', {
+                init: function () {
+                    this.spawnFirefly();
+                },
+                spawnFirefly: function () {
+                    const sceneEl = document.querySelector('a-scene');
+                    const container = document.getElementById('firefly-container');
+                    const firefly = document.createElement('a-entity');
+                    
+                    const x = (Math.random() - 0.5) * 4;
+                    const y = 1 + Math.random() * 2;
+                    const z = (Math.random() - 0.5) * -4;
+                    
+                    firefly.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
+                    firefly.setAttribute('material', 'color: yellow; emissive: yellow; emissiveIntensity: 1');
+                    firefly.setAttribute('position', `${x} ${y} ${z}`);
+                    firefly.setAttribute('firefly', '');
+                    
+                    container.appendChild(firefly);
+                }
+            });
+            
+            AFRAME.registerComponent('firefly', {
+                init: function () {
+                    this.el.addEventListener('mouseenter', () => {
+                        this.el.parentNode.removeChild(this.el);
+                        increaseScore();
+                    });
+                }
+            });
+            
+            let score = 0;
+            function increaseScore() {
+                score++;
+                document.getElementById('scoreboard').setAttribute('text', `value: Score: ${score};`);
+                setTimeout(() => document.querySelector('a-scene').components['spawn-fireflies'].spawnFirefly(), 1000);
+            }
+            
+            document.querySelector('a-scene').setAttribute('spawn-fireflies', '');
+        </script>
     </a-scene>
-  </body>
+</body>
 </html>
