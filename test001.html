@@ -1,42 +1,49 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR MR Game</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-xr@latest/dist/aframe-xr.min.js"></script>
-    <script>
-      AFRAME.registerComponent('click-to-remove', {
-        init: function () {
-          this.el.addEventListener('click', () => {
-            this.el.parentNode.removeChild(this.el);
-          });
-        }
-      });
+    <script src="https://cdn.jsdelivr.net/npm/three@0.138.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.138.0/examples/js/libs/ammo.wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
+</head>
+<body>
+    <a-scene renderer="colorManagement: true" xr-mode-ui="enabled: false" physics="debug: false">
+        
+        <!-- Camera with passthrough support -->
+        <a-entity id="cameraRig" position="0 1.6 0">
+            <a-camera></a-camera>
+            <a-entity id="rightHand" oculus-touch-controls="hand: right" physics-grab></a-entity>
+            <a-entity id="leftHand" oculus-touch-controls="hand: left" physics-grab></a-entity>
+        </a-entity>
+        
+        <!-- Ground for physics interactions -->
+        <a-plane rotation="-90 0 0" width="10" height="10" color="#888" static-body></a-plane>
 
-      AFRAME.registerComponent('spawn-cubes', {
-        init: function () {
-          for (let i = 0; i < 5; i++) {
-            let sceneEl = document.querySelector('a-scene');
-            let box = document.createElement('a-box');
-            box.setAttribute('position', {
-              x: (Math.random() - 0.5) * 2,
-              y: Math.random() + 0.5,
-              z: (Math.random() - 0.5) * -2
-            });
-            box.setAttribute('color', '#' + Math.floor(Math.random() * 16777215).toString(16));
-            box.setAttribute('click-to-remove', '');
-            sceneEl.appendChild(box);
-          }
-        }
-      });
-    </script>
-  </head>
-  <body>
-    <a-scene xr-mode-ui="enabled: true" embedded arjs="sourceType: webcam;">
-      <a-light type="ambient" color="#888"></a-light>
-      <a-camera position="0 1.6 0" look-controls>
-        <a-entity cursor="rayOrigin: mouse"></a-entity>
-      </a-camera>
-      <a-entity spawn-cubes></a-entity>
+        <!-- Spawning objects with physics -->
+        <a-entity id="spawner" position="0 1.5 -2">
+            <a-box color="red" width="0.3" height="0.3" depth="0.3" dynamic-body grabbable></a-box>
+        </a-entity>
     </a-scene>
-  </body>
+
+    <script>
+        AFRAME.registerComponent("spawner", {
+            init: function () {
+                this.el.addEventListener("click", () => {
+                    let scene = document.querySelector("a-scene");
+                    let newBox = document.createElement("a-box");
+                    newBox.setAttribute("color", "blue");
+                    newBox.setAttribute("width", "0.3");
+                    newBox.setAttribute("height", "0.3");
+                    newBox.setAttribute("depth", "0.3");
+                    newBox.setAttribute("dynamic-body", "");
+                    newBox.setAttribute("position", "0 1.5 -2");
+                    scene.appendChild(newBox);
+                });
+            }
+        });
+    </script>
+</body>
 </html>
